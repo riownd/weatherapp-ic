@@ -18,10 +18,25 @@
         height: 100vh;
       }
   
-      @media (max-width: 600px) {
+      url @media (max-width: 600px) {
         body {
           height: 100%;
         }
+      }
+
+      .btn-outline-purple {
+        color: #7177de;
+        border: 1px solid #7177de;
+      }
+
+      .btn-outline-purple:hover {
+        color: #585db4;
+        border: 1px solid #585db4;
+      }
+
+      .btn-outline-purple:active {
+        color: #3f4283;
+        border: 1px solid #3b3e79;
       }
     </style>
   </head>
@@ -35,7 +50,7 @@
             </a>
             <form class="d-flex" role="search" id="searchCity">
                 <input class="form-control me-2" type="search" placeholder="🔍︎ Search City" aria-label="Search">
-                <button class="btn btn-outline-success bg-light" type="submit">Search</button>
+                <button class="btn btn-outline-purple bg-light" type="submit">Search</button>
             </form>
         </div>
     </nav>
