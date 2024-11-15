@@ -1,0 +1,8 @@
+.sunrise-additional,
+.sunset-additional {
+  margin-left: 5px;
+  margin-right: 5px;
+  background: #fff;
+  border-radius: 50px;
+  padding: 2.5px 10px;
+}
