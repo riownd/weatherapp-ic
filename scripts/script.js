@@ -1,79 +1,102 @@
-var cityInputValue = cityInput.value;
+// Fungsi untuk fetch data cuaca dari API
+async function fetchWeatherData(location) {
+    // Show loader while fetching data
+    document.getElementById('loader').style.display = 'flex';
+    document.querySelector('.location-name').innerText = `Searching for ${location}...`;
 
-var apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=-6.8886&longitude=109.6753&daily=sunrise,sunset&timezone=Asia%2FBangkok`;
+    try {
+        // Gunakan API Geocoding untuk mendapatkan latitude dan longitude
+        const geoResponse = await fetch(`https://nominatim.openstreetmap.org/search?q=${location}&format=json`);
+        const geoData = await geoResponse.json();
 
-if (cityInputValue != "") {
-    async function getWeather() {
-        var response = await fetch(apiUrl);
-        var data = await response.json();
+        if (geoData.length === 0) {
+            alert("Location not found. Please try another city or state.");
+            document.getElementById('loader').style.display = 'none';  // Hide loader
+            return;
+        }
 
-        if (data.message != "city not found" && data.cod != "404") 
-            var sunrise = data.sys.sunrise;
-            var sunset = data.sys.sunset;
+        const { lat, lon } = geoData[0];
 
-            fetch(`https://api.open-meteo.com/v1/forecast?latitude=-6.8886&longitude=109.6753&daily=sunrise,sunset&timezone=Asia%2FBangkok`)
-                .then(response => response.json())
-                .then(data => {
-                    const forecastContainer = document.getElementById('forecast-container');
-                    forecastContainer.innerHTML = '';
+        // API URL Open-Meteo
+        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&start_date=${getCurrentDate()}&end_date=${getEndDate()}&timezone=auto`;
 
-                    const dailyForecasts = {};
-                    data.list.forEach(entry => {
-                        const dateTime = new Date(entry.dt * 1000);
-                        const date = dateTime.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
-                        if (!dailyForecasts[date]) {
-                            dailyForecasts[date] = {
-                                date: date,
-                                icon: `https://openweathermap.org/img/w/${entry.weather[0].icon}.png`,
-                                maxTemp: -Infinity,
-                                minTemp: Infinity,
-                                weatherType: entry.weather[0].main
-                            };
-                        }
+        // Fetch data cuaca
+        const response = await fetch(apiUrl);
+        const data = await response.json();
 
-                        if (entry.main.temp_max > dailyForecasts[date].maxTemp) {
-                            dailyForecasts[date].maxTemp = entry.main.temp_max;
-                        }
-                        if (entry.main.temp_min < dailyForecasts[date].minTemp) {
-                            dailyForecasts[date].minTemp = entry.main.temp_min;
-                        }
-                    });
+        // Render data cuaca ke UI
+        renderDailyForecast(data.daily.temperature_2m_max, data.daily.temperature_2m_min, data.daily.sunrise, data.daily.sunset);
 
-                    Object.values(dailyForecasts).forEach(day => {
-                        const forecastCard = document.createElement('div');
-                        forecastCard.classList.add('daily-forecast-card');
+        // Update the location name after data is fetched
+        document.querySelector('.location-name').innerText = ` ${location}`;
 
-                        forecastCard.innerHTML = `
-        <p class="daily-forecast-date">${day.date}</p>
-        <div class="daily-forecast-logo"><img class="imgs-as-icons" src="${day.icon}"></div>
-        <div class="max-min-temperature-daily-forecast">
-          <span class="max-daily-forecast">${Math.round(day.maxTemp - 273.15)}<sup>o</sup>C</span>
-          <span class="min-daily-forecast">${Math.round(day.minTemp - 273.15)}<sup>o</sup>C</span>
-        </div>
-        <p class="weather-type-daily-forecast">${day.weatherType}</p>
-      `;
-      forecastContainer.appendChild(forecastCard);
+    } catch (error) {
+        console.error("Error fetching weather data:", error);
+        alert("Unable to fetch data. Please check your connection or try again.");
+    } finally {
+        // Hide loader after fetching is done
+        document.getElementById('loader').style.display = 'none';
+    }
+}
+
+// Fungsi untuk mendapatkan tanggal hari ini
+function getCurrentDate() {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+}
+
+// Fungsi untuk mendapatkan tanggal 5 hari ke depan
+function getEndDate() {
+    const today = new Date();
+    const future = new Date(today);
+    future.setDate(today.getDate() + 5);
+    return future.toISOString().split("T")[0];
+}
+
+// Render data cuaca harian dengan nama hari (Monday - Saturday)
+function renderDailyForecast(maxTemps, minTemps, sunriseData, sunsetData) {
+    const container = document.getElementById("daily-forecast-container");
+    container.innerHTML = ""; // Kosongkan kontainer
+
+    // Starting day: Monday
+    const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    maxTemps.forEach((maxTemp, index) => {
+        const forecastItem = document.createElement("div");
+        forecastItem.className = "daily-forecast-item";
+
+        // Get the corresponding weekday name
+        const dayOfWeek = weekdays[index];
+
+        // Create weather info for each day
+        forecastItem.innerHTML = `
+            <div class="card text-center p-3" style="background-color: rgba(255, 255, 255, 0.2); border: none;">
+                <h5>${dayOfWeek}</h5>  <!-- Show the actual day of the week -->
+                <p>Max Temp: ${maxTemp}°C</p>
+                <p>Min Temp: ${minTemps[index]}°C</p>
+                <p>🌅 Sunrise: ${new Date(sunriseData[index]).toLocaleTimeString()}</p>
+                <p>🌇 Sunset: ${new Date(sunsetData[index]).toLocaleTimeString()}</p>
+            </div>
+        `;
+        container.appendChild(forecastItem);
     });
-  })
-  .catch(error => {
-    console.error('Error fetching data:', error);
-  });
-
-
-
-document.getElementById("locationName").innerHTML = location;
-document.getElementById("sunriseAdditionalValue").innerHTML = sunrise;
-document.getElementById("sunsetAdditionalValue").innerHTML = sunset;
-}
-else {
-document.getElementById("locationName").innerHTML = "City Not Found";
-document.getElementById("temperatureValue").innerHTML = "";
-document.getElementById("weatherType").innerHTML = "";
-}
 }
 
-getWeather();
-}
-else document.getElementById("locationName").innerHTML = "Enter a city name...";
-}
+// Event listener untuk pencarian lokasi
+document.getElementById("searchCity").addEventListener("submit", (e) => {
+    e.preventDefault();  // Prevent the form from submitting in the traditional way
+
+    const location = e.target.querySelector("input").value;
+    if (!location) {
+        alert("Please enter a city or state.");
+        return;
+    }
+
+    // Fetch cuaca berdasarkan lokasi
+    fetchWeatherData(location);
+});
+
+// Panggil fungsi awal untuk data default
+document.addEventListener("DOMContentLoaded", () => {
+    fetchWeatherData("Tegal"); // Default lokasi
 });
