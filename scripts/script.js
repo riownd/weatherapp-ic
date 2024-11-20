@@ -1,7 +1,6 @@
 // Fungsi untuk fetch data cuaca dari API
 async function fetchWeatherData(location) {
-    // Show loader while fetching data
-    document.getElementById('loader').style.display = 'flex';
+    // Memperlihatkan Loader
     document.querySelector('.location-name').innerText = `Searching for ${location}...`;
 
     try {
@@ -11,8 +10,6 @@ async function fetchWeatherData(location) {
 
         if (geoData.length === 0) {
             alert("Location not found. Please try another city or state.");
-            document.getElementById('loader').style.display = 'none';  // Hide loader
-            return;
         }
 
         const { lat, lon } = geoData[0];
@@ -33,10 +30,7 @@ async function fetchWeatherData(location) {
     } catch (error) {
         console.error("Error fetching weather data:", error);
         alert("Unable to fetch data. Please check your connection or try again.");
-    } finally {
-        // Hide loader after fetching is done
-        document.getElementById('loader').style.display = 'none';
-    }
+    } 
 }
 
 // Fungsi untuk mendapatkan tanggal hari ini
