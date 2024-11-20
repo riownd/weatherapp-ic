@@ -70,7 +70,7 @@ function renderDailyForecast(maxTemps, minTemps, sunriseData, sunsetData) {
 
         // Create weather info for each day
         forecastItem.innerHTML = `
-            <div class="card text-center p-3" style="background-color: rgba(255, 255, 255, 0.2); border: none;">
+            <div>
                 <h5>${dayOfWeek}</h5>  <!-- Show the actual day of the week -->
                 <p>Max Temp: ${maxTemp}°C</p>
                 <p>Min Temp: ${minTemps[index]}°C</p>
