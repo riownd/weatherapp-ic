@@ -50,7 +50,7 @@ function getEndDate() {
 // Render data cuaca harian dengan nama hari (Monday - Saturday)
 function renderDailyForecast(maxTemps, minTemps, sunriseData, sunsetData) {
     const container = document.getElementById("daily-forecast-container");
-    container.innerHTML = ""; // Kosongkan kontainer
+    container.innerHTML = ""; 
 
     // Starting day: Monday
     const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -78,7 +78,7 @@ function renderDailyForecast(maxTemps, minTemps, sunriseData, sunsetData) {
 
 // Event listener untuk pencarian lokasi
 document.getElementById("searchCity").addEventListener("submit", (e) => {
-    e.preventDefault();  // Prevent the form from submitting in the traditional way
+    e.preventDefault();
 
     const location = e.target.querySelector("input").value;
     if (!location) {
@@ -93,4 +93,36 @@ document.getElementById("searchCity").addEventListener("submit", (e) => {
 // Panggil fungsi awal untuk data default
 document.addEventListener("DOMContentLoaded", () => {
     fetchWeatherData("Tegal"); // Default lokasi
+});
+
+// Fungsi untuk mengubah background secara otomatis
+function changeBackground() {
+    // Get current hour
+    const currentHour = new Date().getHours();
+    let backgroundImage;
+
+    if (currentHour >= 5 && currentHour < 9) {
+        // Pagi
+        backgroundImage = 'day1.jpg';
+    } else if (currentHour >= 9 && currentHour < 13) {
+        // Siang awal
+        backgroundImage = 'day2.jpg';
+    } else if (currentHour >= 13 && currentHour < 16) {
+        // Siang akhir
+        backgroundImage = 'day3.jpg';
+    } else if (currentHour >= 16 && currentHour < 19) {
+        // Sore
+        backgroundImage = 'day4.jpg';
+    } else {
+        // Malam
+        backgroundImage = 'day5.jpg';
+    }
+
+    document.body.style.backgroundImage = `url('media/${backgroundImage}')`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    changeBackground();
+    
+    setInterval(changeBackground, 60000);
 });
